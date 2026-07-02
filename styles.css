@@ -1,0 +1,203 @@
+/* Importar la fuente Rajdhani */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+
+/* Estilos Globales y Centrado */
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #0f0019; /* Fondo oscuro púrpura */
+    font-family: "Rajdhani", sans-serif;
+}
+
+/* Contenedor del Panel (Estilo Futurista) */
+.social-panel {
+    width: 190px;
+    padding: 14px 20px;
+    background: rgba(15, 0, 25, 0.9);
+    border: 2px solid #8b5cf6; 
+    clip-path: polygon(0 0, 96% 0, 100% 15%, 100% 100%, 4% 100%, 0 85%);
+    box-shadow: 0 0 20px rgba(160, 50, 255, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Contenedor del Icono */
+.social-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(60, 0, 90, 0.35), rgba(40, 0, 70, 0.35));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; 
+}
+
+/* Estilo para la imagen inyectada (Logo) */
+.social-icon img {
+    width: 35px; /* Tamaño del logo dentro del contenedor */
+    height: 48px;
+    object-fit: contain; /* Asegura que la imagen se vea bien sin estirarse */
+    /* *** LÍNEA ELIMINADA: filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5)); *** */
+}
+
+/* Estilo del Nombre de Usuario */
+.social-user {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(150, 80, 255, 0.9);
+    text-transform: uppercase;
+}
+
+/* =========================================
+   MARCO PARA CÁMARA (camera.html)
+   ========================================= */
+
+body.camera-body {
+    /* IMPORTANTE: Fondo transparente para que en OBS se vea la cámara detrás */
+    background: transparent !important; 
+    /* Si quieres probarlo en tu navegador y no ves nada, 
+       puedes cambiar momentáneamente esto a #0f0019 */
+    overflow: hidden; /* Evita que aparezcan barras de desplazamiento en OBS */
+}
+
+.camera-frame {
+    position: relative;
+    
+    /* Se adapta automáticamente al tamaño que tenga la fuente en OBS (por defecto 800x600) */
+    /* Restamos 60px para que las sombras y los bordes no se corten en los bordes de la ventana */
+    width: calc(100vw - 60px); 
+    height: calc(100vh - 60px);
+    box-sizing: border-box;
+    
+    /* El borde morado más gordito */
+    border: 8px solid #8b5cf6;
+    
+    background: transparent;
+    
+    /* Animación de entrada y luego pulso de neón infinito */
+    animation: frameAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, neonPulse 3s 0.8s infinite alternate;
+}
+
+@keyframes frameAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+        box-shadow: 0 0 0 rgba(160, 50, 255, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 25px rgba(160, 50, 255, 0.5), inset 0 0 25px rgba(160, 50, 255, 0.5);
+    }
+}
+
+@keyframes neonPulse {
+    0% {
+        box-shadow: 0 0 15px rgba(160, 50, 255, 0.3), inset 0 0 15px rgba(160, 50, 255, 0.3);
+        border-color: #7b4df0;
+    }
+    100% {
+        box-shadow: 0 0 45px rgba(160, 50, 255, 0.9), inset 0 0 45px rgba(160, 50, 255, 0.9);
+        border-color: #a580ff;
+    }
+}
+
+/* Detalles decorativos en las 4 esquinas */
+.camera-corner {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 6px solid #ffffff;
+    
+    /* Animación de pulso independiente para las esquinas */
+    animation: cornerPulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes cornerPulse {
+    0% {
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.7);
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 1);
+        border-color: #ffffff;
+    }
+}
+
+.camera-corner.top-left {
+    top: -8px;
+    left: -8px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.camera-corner.top-right {
+    top: -8px;
+    right: -8px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.camera-corner.bottom-left {
+    bottom: -8px;
+    left: -8px;
+    border-right: none;
+    border-top: none;
+}
+
+.camera-corner.bottom-right {
+    bottom: -8px;
+    right: -8px;
+    border-left: none;
+    border-top: none;
+}
+
+/* =========================================
+   RECTÁNGULO DEL LOGO SUPERIOR
+   ========================================= */
+
+.camera-brand {
+    position: absolute;
+    /* Se superpone exactamente al borde superior de 8px */
+    top: -8px; 
+    left: 50%;
+    transform: translateX(-50%);
+    
+    background: rgba(15, 0, 25, 0.95);
+    border: 6px solid #8b5cf6;
+    border-top: none; /* Elimina la línea superior para que parezca salir del marco */
+    border-radius: 0 0 20px 20px; /* Redondeado por debajo */
+    
+    padding: 15px 50px;
+    box-shadow: 0 10px 25px rgba(160, 50, 255, 0.6);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px; /* Separación entre el logo y el nombre */
+    z-index: 10;
+}
+
+.camera-brand img {
+    height: 45px; /* Ajusta esto si lo quieres más grande o pequeño */
+    width: auto;
+    object-fit: contain;
+    /* Un ligero brillo extra al logo blanco */
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+.brand-name {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px rgba(150, 80, 255, 0.9), 0 0 20px rgba(150, 80, 255, 0.5);
+    margin-top: 4px; /* Ligero ajuste para alinearlo visualmente mejor con el icono */
+}
