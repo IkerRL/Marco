@@ -83,7 +83,8 @@ const dom = {
     connectionStatusPill: document.getElementById('connection-status-pill'),
     connectionStatusText: document.getElementById('connection-status-text'),
     btnSpotifyLogin: document.getElementById('btn-spotify-login'),
-    btnSpotifyDisconnect: document.getElementById('btn-spotify-disconnect')
+    btnSpotifyDisconnect: document.getElementById('btn-spotify-disconnect'),
+    toast: document.getElementById('hud-toast')
 };
 
 // ==========================================
@@ -514,18 +515,51 @@ function setupEventListeners() {
     dom.btnSpotifyLogin.addEventListener('click', startSpotifyAuth);
     dom.btnSpotifyDisconnect.addEventListener('click', disconnectSpotify);
 
-    // Atajos de teclado:
-    // 'D': Play/Pause simulación
-    // 'H': Ocultar/Mostrar el botón HUD del streamer
-    // 'S': Abrir configuración
+    // Sistema de Notificación Rápida (Toast)
+    let toastTimeout = null;
+    function showToast(message) {
+        if (!dom.toast) return;
+        dom.toast.textContent = message;
+        dom.toast.classList.add('show');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            dom.toast.classList.remove('show');
+        }, 2200);
+    }
+
+    // Alternar visibilidad del HUD de controles
+    function toggleStreamerHud() {
+        const isVisible = dom.streamerHud.classList.toggle('is-visible');
+        if (isVisible) {
+            showToast('⚡ Controles de Spotify VISIBLES (Pulsa H o Ctrl+H para ocultar)');
+        } else {
+            showToast('🔒 Controles de Spotify OCULTOS para Stream');
+            dom.hudPanel.classList.add('hidden');
+        }
+    }
+
+    // Atajos de teclado para streamers:
+    // 'H' o 'Ctrl+H' o 'F2': Mostrar / Ocultar el botón y controles del streamer
+    // 'D': Play / Pause simulación
+    // 'S': Abrir configuración de Spotify
+    // 'Escape': Cerrar paneles y ventanas emergentes
     window.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT') return; // Ignorar si está escribiendo en un input
-        if (e.key === 'd' || e.key === 'D') {
+
+        const isHKey = e.key === 'h' || e.key === 'H';
+        const isF2 = e.key === 'F2';
+
+        if (isHKey || isF2) {
+            e.preventDefault();
+            toggleStreamerHud();
+        } else if (e.key === 'd' || e.key === 'D') {
             togglePlayback();
-        } else if (e.key === 'h' || e.key === 'H') {
-            dom.streamerHud.classList.toggle('hidden-by-user');
+            showToast(appState.isPlaying ? '▶️ Spotify: Reproduciendo' : '⏸️ Spotify: Pausado');
         } else if (e.key === 's' || e.key === 'S') {
             dom.spotifyModal.classList.toggle('hidden');
+        } else if (e.key === 'Escape') {
+            dom.hudPanel.classList.add('hidden');
+            dom.spotifyModal.classList.add('hidden');
         }
     });
 }
