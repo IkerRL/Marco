@@ -77,11 +77,14 @@
         
     </div>
 
-    <!-- Panel de control flotante para streamer (ocultable con tecla 'H') -->
+    <!-- Zona táctil/hover invisible en la esquina inferior derecha -->
+    <div id="hud-corner-hotspot" class="hud-corner-hotspot" title="Pasa el ratón por aquí o pulsa H para ver controles"></div>
+
+    <!-- Panel de control flotante para streamer (oculto por defecto para stream, mostrar con tecla H o Ctrl+H) -->
     <div id="streamer-hud" class="streamer-hud">
-        <button id="hud-toggle-btn" class="hud-pill-btn" title="Controles (Pulsa H para ocultar en stream)">
+        <button id="hud-toggle-btn" class="hud-pill-btn" title="Controles (Pulsa H o Ctrl+H para ocultar)">
             <span class="hud-icon">⚡</span>
-            <span class="hud-label">SPOTIFY OVERLAY</span>
+            <span class="hud-label">SPOTIFY CONTROLS</span>
         </button>
 
         <div id="hud-panel" class="hud-panel hidden">
@@ -107,10 +110,13 @@
             </div>
 
             <div class="hud-tip">
-                <span>Atajos: <strong>D</strong> (Play/Pause) | <strong>H</strong> (Ocultar panel)</span>
+                <span>Atajo: <strong>H</strong> o <strong>Ctrl+H</strong> (Mostrar/Ocultar) | <strong>D</strong> (Play/Pause)</span>
             </div>
         </div>
     </div>
+
+    <!-- Notificación temporal al pulsar atajos -->
+    <div id="hud-toast" class="hud-toast"></div>
 
     <!-- Modal de Configuración Spotify Web API -->
     <div id="spotify-modal" class="spotify-modal hidden">
@@ -171,10 +177,27 @@
 
                     <button id="btn-spotify-disconnect" class="btn-disconnect hidden">Desconectar</button>
                 </div>
+
+                <!-- Sección Conexión Permanente en Código (config.js) -->
+                <div id="permanent-config-card" class="permanent-config-card">
+                    <div class="perm-header">
+                        <span class="perm-icon">🔒</span>
+                        <strong>Conexión Permanente para OBS (config.js)</strong>
+                    </div>
+                    <p id="perm-status-desc" class="perm-desc">
+                        Rellena tu archivo <code>config.js</code> para que el marco esté conectado siempre sin pedir login.
+                    </p>
+                    <div id="perm-code-box" class="perm-code-box hidden">
+                        <textarea id="perm-code-snippet" rows="4" readonly></textarea>
+                        <button id="btn-copy-perm-code" class="btn-copy-wide">Copiar código para config.js</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Archivo de configuración permanente de Spotify -->
+    <script src="config.js"></script>
     <!-- Script de lógica de marco y Spotify -->
     <script src="script.js"></script>
 </body>

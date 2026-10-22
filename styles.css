@@ -831,3 +831,82 @@ body.camera-body {
     background: #ef4444;
     color: #ffffff;
 }
+
+/* Tarjeta de conexión permanente en el modal */
+.permanent-config-card {
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 14px;
+    transition: all 0.3s ease;
+}
+
+.permanent-config-card.active {
+    background: rgba(29, 185, 84, 0.12);
+    border-color: rgba(29, 185, 84, 0.5);
+    box-shadow: 0 0 15px rgba(29, 185, 84, 0.2);
+}
+
+.perm-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.permanent-config-card.active .perm-header {
+    color: #1DB954;
+}
+
+.perm-desc {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin: 0 0 6px 0;
+    line-height: 1.4;
+}
+
+.perm-desc code {
+    background: rgba(0, 0, 0, 0.4);
+    color: #a855f7;
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+
+.perm-code-box {
+    margin-top: 8px;
+}
+
+.perm-code-box textarea {
+    width: 100%;
+    background: rgba(10, 0, 20, 0.85);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    border-radius: 6px;
+    color: #86efac;
+    font-family: monospace;
+    font-size: 11px;
+    padding: 8px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.btn-copy-wide {
+    width: 100%;
+    margin-top: 6px;
+    background: #8b5cf6;
+    border: none;
+    color: #ffffff;
+    padding: 8px;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-copy-wide:hover {
+    background: #a855f7;
+}

@@ -1,8 +1,10 @@
 /**
- * Camera Frame Spotify Dynamic Overlay
- * Supports:
- * 1. Spotify Web API (OAuth PKCE with automatic token refresh)
- * 2. Interactive Demo Mode for testing & streaming preview
+ * Camera Frame Spotify Dynamic Overlay (MakacaGotica)
+ * Soporta:
+ * 1. Conexión Permanente 24/7 mediante config.js (automática y sin login)
+ * 2. Spotify Web API (OAuth PKCE con renovación transparente de tokens)
+ * 3. Last.fm (alternativa sin tokens)
+ * 4. Modo Demostración interactivo (para previsualización sin música)
  */
 
 // ==========================================
@@ -37,11 +39,11 @@ const DEMO_PLAYLIST = [
 ];
 
 let appState = {
-    isDemo: true,
-    isPlaying: true,
+    isDemo: false,
+    isPlaying: false,
     currentTrack: null,
-    progressMs: 38000,
-    durationMs: 204000,
+    progressMs: 0,
+    durationMs: 0,
     lastUpdateTimestamp: Date.now(),
     demoIndex: 0,
     pollTimer: null,
@@ -63,7 +65,7 @@ const dom = {
     statusText: document.getElementById('spotify-status-text'),
     equalizer: document.getElementById('spotify-equalizer'),
 
-    // HUD
+    // HUD flotante
     streamerHud: document.getElementById('streamer-hud'),
     hudToggleBtn: document.getElementById('hud-toggle-btn'),
     hudPanel: document.getElementById('hud-panel'),
@@ -84,12 +86,46 @@ const dom = {
     connectionStatusText: document.getElementById('connection-status-text'),
     btnSpotifyLogin: document.getElementById('btn-spotify-login'),
     btnSpotifyDisconnect: document.getElementById('btn-spotify-disconnect'),
-    toast: document.getElementById('hud-toast')
+    toast: document.getElementById('hud-toast'),
+
+    // Elementos de Configuración Permanente (config.js)
+    permCard: document.getElementById('permanent-config-card'),
+    permStatusDesc: document.getElementById('perm-status-desc'),
+    permCodeBox: document.getElementById('perm-code-box'),
+    permCodeSnippet: document.getElementById('perm-code-snippet'),
+    btnCopyPermCode: document.getElementById('btn-copy-perm-code')
 };
 
 // ==========================================
-// 3. UTILIDADES
+// 3. UTILIDADES Y GESTIÓN DE CONFIGURACIÓN
 // ==========================================
+
+// Leer configuración activa priorizando config.js y con fallback a localStorage
+function getActiveConfig() {
+    const cfg = (typeof SPOTIFY_CONFIG !== 'undefined') ? SPOTIFY_CONFIG : {};
+    
+    const cfgClientId = (cfg.clientId && cfg.clientId.trim() !== "" && !cfg.clientId.includes("TU_CLIENT_ID")) 
+        ? cfg.clientId.trim() 
+        : (localStorage.getItem('spotify_client_id') || "");
+
+    const cfgRefreshToken = (cfg.refreshToken && cfg.refreshToken.trim() !== "" && !cfg.refreshToken.includes("TU_REFRESH_TOKEN"))
+        ? cfg.refreshToken.trim() 
+        : (localStorage.getItem('spotify_refresh_token') || "");
+
+    const cfgLastFm = (cfg.lastFmUser && cfg.lastFmUser.trim() !== "") 
+        ? cfg.lastFmUser.trim() 
+        : "";
+
+    const isFromConfigFile = !!(cfg.clientId && cfg.clientId.trim() !== "" && !cfg.clientId.includes("TU_CLIENT_ID") &&
+                                cfg.refreshToken && cfg.refreshToken.trim() !== "" && !cfg.refreshToken.includes("TU_REFRESH_TOKEN"));
+
+    return {
+        clientId: cfgClientId,
+        refreshToken: cfgRefreshToken,
+        lastFmUser: cfgLastFm,
+        isFromConfigFile
+    };
+}
 
 // Formatear milisegundos a m:ss
 function formatTime(ms) {
@@ -130,6 +166,18 @@ function base64UrlEncode(str) {
         .replace(/=+$/, '');
 }
 
+// Sistema de Notificación Rápida (Toast)
+let toastTimeout = null;
+function showToast(message) {
+    if (!dom.toast) return;
+    dom.toast.textContent = message;
+    dom.toast.classList.add('show');
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+        dom.toast.classList.remove('show');
+    }, 2200);
+}
+
 // ==========================================
 // 4. ACTUALIZACIÓN VISUAL DEL WIDGET
 // ==========================================
@@ -163,7 +211,7 @@ function updateWidgetView(track, isPlaying, progressMs, durationMs) {
         dom.dropdown.classList.remove('is-paused');
         dom.statusText.textContent = 'REPRODUCIENDO';
     } else {
-        // Si no está sonando, replegar el desplegable hacia arriba
+        // Si no está sonando, replegar el desplegable hacia arriba en el límite del marco
         dom.dropdown.classList.remove('is-active');
         dom.dropdown.classList.add('is-paused');
         dom.statusText.textContent = 'EN PAUSA';
@@ -183,7 +231,7 @@ function startProgressTicker() {
 
         appState.progressMs += delta;
 
-        // Si es demo y supera la duración, reiniciar o pasar a la siguiente
+        // Si es demo y supera la duración, pasar a la siguiente pista
         if (appState.isDemo && appState.progressMs >= appState.durationMs) {
             nextDemoTrack();
             return;
@@ -201,6 +249,7 @@ function startProgressTicker() {
 
 function initDemoMode() {
     appState.isDemo = true;
+    appState.isPlaying = true;
     appState.demoIndex = 0;
     loadDemoTrack(appState.demoIndex);
     startProgressTicker();
@@ -224,7 +273,7 @@ function nextDemoTrack() {
 function togglePlayback() {
     appState.isPlaying = !appState.isPlaying;
     appState.lastUpdateTimestamp = Date.now();
-    updateWidgetView(appState.currentTrack, appState.isPlaying, appState.progressMs, appState.durationMs);
+    updateWidgetView(appState.currentTrack || DEMO_PLAYLIST[0], appState.isPlaying, appState.progressMs, appState.durationMs);
 
     if (dom.btnTogglePlayback) {
         dom.btnTogglePlayback.textContent = appState.isPlaying ? 'Pausar (Ocultar)' : 'Reanudar (Mostrar)';
@@ -232,11 +281,12 @@ function togglePlayback() {
 }
 
 // ==========================================
-// 6. SPOTIFY WEB API (PKCE AUTH)
+// 6. SPOTIFY WEB API & CONEXIÓN PERMANENTE
 // ==========================================
 
 async function startSpotifyAuth() {
-    const clientId = localStorage.getItem('spotify_client_id') || dom.clientIdInput.value.trim();
+    const config = getActiveConfig();
+    const clientId = config.clientId || dom.clientIdInput.value.trim();
     if (!clientId) {
         alert('Por favor, introduce primero tu Client ID de Spotify.');
         dom.clientIdInput.focus();
@@ -302,12 +352,15 @@ async function handleSpotifyCallback() {
         const data = await response.json();
         if (data.access_token) {
             saveTokens(data);
-            // Limpiar query params de la URL sin recargar
             window.history.replaceState({}, document.title, window.location.pathname);
             appState.isDemo = false;
             startApiPolling();
             updateConnectionStatusUI();
-            alert('¡Conectado exitosamente con Spotify!');
+            
+            // Mostrar modal de configuración con el snippet listo para config.js
+            updatePermSnippetUI(clientId, data.refresh_token);
+            dom.spotifyModal.classList.remove('hidden');
+            showToast('✅ ¡Spotify conectado! Copia tu código en config.js');
         } else {
             console.error('Error al canjear código:', data);
         }
@@ -325,9 +378,11 @@ function saveTokens(data) {
     localStorage.setItem('spotify_expires_at', expiresAt);
 }
 
+// Renovar automáticamente el Access Token usando el Refresh Token
 async function refreshAccessToken() {
-    const refreshToken = localStorage.getItem('spotify_refresh_token');
-    const clientId = localStorage.getItem('spotify_client_id');
+    const config = getActiveConfig();
+    const refreshToken = config.refreshToken;
+    const clientId = config.clientId;
 
     if (!refreshToken || !clientId) return false;
 
@@ -345,40 +400,48 @@ async function refreshAccessToken() {
         const data = await response.json();
         if (data.access_token) {
             saveTokens(data);
+            if (data.refresh_token) {
+                localStorage.setItem('spotify_refresh_token', data.refresh_token);
+            }
             return true;
+        } else {
+            console.error('Error renovando token:', data);
         }
     } catch (err) {
-        console.error('Error refrescando token:', err);
+        console.error('Error de red refrescando token:', err);
     }
     return false;
 }
 
+// Consultar en tiempo real la canción activa en Spotify
 async function fetchCurrentlyPlaying() {
     let accessToken = localStorage.getItem('spotify_access_token');
     const expiresAt = parseInt(localStorage.getItem('spotify_expires_at') || '0', 10);
 
-    // Refrescar si está a menos de 60 segundos de caducar
-    if (Date.now() > expiresAt - 60000) {
+    // Si el token está expirado o a menos de 60s de caducar, refrescarlo en silencio
+    if (!accessToken || Date.now() > expiresAt - 60000) {
         const ok = await refreshAccessToken();
-        if (ok) accessToken = localStorage.getItem('spotify_access_token');
+        if (ok) {
+            accessToken = localStorage.getItem('spotify_access_token');
+        } else {
+            return;
+        }
     }
-
-    if (!accessToken) return;
 
     try {
         const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
 
+        // 204: Nada reproduciéndose en este momento
         if (response.status === 204) {
-            // Nada sonando
             appState.isPlaying = false;
             updateWidgetView(appState.currentTrack || DEMO_PLAYLIST[0], false, 0, 0);
             return;
         }
 
+        // 401: Token caducado
         if (response.status === 401) {
-            // No autorizado -> intentar refrescar
             const ok = await refreshAccessToken();
             if (ok) fetchCurrentlyPlaying();
             return;
@@ -410,7 +473,7 @@ async function fetchCurrentlyPlaying() {
             updateWidgetView(track, appState.isPlaying, appState.progressMs, appState.durationMs);
         }
     } catch (err) {
-        console.error('Error consultando Spotify:', err);
+        console.error('Error consultando Spotify API:', err);
     }
 }
 
@@ -421,6 +484,38 @@ function startApiPolling() {
     startProgressTicker();
 }
 
+// Soporte Last.fm opcional
+async function fetchLastFmPlaying(user) {
+    try {
+        const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(user)}&api_key=2c608f1b67275466353d2f8298f2072e&format=json&limit=1`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const track = data.recenttracks?.track?.[0];
+        if (track && track['@attr'] && track['@attr'].nowplaying === 'true') {
+            const song = {
+                title: track.name,
+                artist: track.artist?.['#text'] || 'Artista',
+                cover: track.image?.[2]?.['#text'] || 'demo_cover.jpg',
+                durationMs: 210000
+            };
+            appState.currentTrack = song;
+            appState.isPlaying = true;
+            updateWidgetView(song, true, 45000, 210000);
+        } else {
+            appState.isPlaying = false;
+            updateWidgetView(appState.currentTrack || DEMO_PLAYLIST[0], false, 0, 0);
+        }
+    } catch (e) {
+        console.error('Error consultando Last.fm:', e);
+    }
+}
+
+function startLastFmPolling(user) {
+    if (appState.pollTimer) clearInterval(appState.pollTimer);
+    fetchLastFmPlaying(user);
+    appState.pollTimer = setInterval(() => fetchLastFmPlaying(user), 3000);
+}
+
 function disconnectSpotify() {
     localStorage.removeItem('spotify_access_token');
     localStorage.removeItem('spotify_refresh_token');
@@ -428,12 +523,39 @@ function disconnectSpotify() {
     if (appState.pollTimer) clearInterval(appState.pollTimer);
     initDemoMode();
     updateConnectionStatusUI();
-    alert('Desconectado de Spotify. Volviendo a modo demostración.');
+    showToast('Desconectado. Modo demo activo.');
+}
+
+// Actualizar la caja del código de config.js para copiarlo fácilmente
+function updatePermSnippetUI(clientId, refreshToken) {
+    if (!dom.permCodeBox || !dom.permCodeSnippet) return;
+    if (clientId && refreshToken) {
+        const code = `const SPOTIFY_CONFIG = {\n    clientId: "${clientId}",\n    refreshToken: "${refreshToken}",\n    lastFmUser: ""\n};`;
+        dom.permCodeSnippet.value = code;
+        dom.permCodeBox.classList.remove('hidden');
+    }
 }
 
 function updateConnectionStatusUI() {
-    const hasToken = !!localStorage.getItem('spotify_access_token');
-    if (hasToken && !appState.isDemo) {
+    const config = getActiveConfig();
+    const hasToken = !!localStorage.getItem('spotify_access_token') || !!config.refreshToken;
+
+    if (config.isFromConfigFile) {
+        // Conexión activa 100% permanente desde archivo config.js
+        dom.connectionStatusPill.classList.remove('offline');
+        dom.connectionStatusPill.classList.add('online');
+        dom.connectionStatusText.textContent = 'Conectado Permanente (config.js)';
+        dom.btnSpotifyLogin.classList.add('hidden');
+        dom.btnSpotifyDisconnect.classList.remove('hidden');
+        dom.btnToggleDemo.classList.remove('active');
+        dom.btnToggleDemo.textContent = 'Modo: SPOTIFY EN VIVO';
+
+        if (dom.permCard) {
+            dom.permCard.classList.add('active');
+            dom.permStatusDesc.innerHTML = '✅ <strong>Conexión permanente activa desde <code>config.js</code></strong>. El marco estará siempre conectado de forma automática en OBS.';
+            dom.permCodeBox.classList.add('hidden');
+        }
+    } else if (hasToken && !appState.isDemo) {
         dom.connectionStatusPill.classList.remove('offline');
         dom.connectionStatusPill.classList.add('online');
         dom.connectionStatusText.textContent = 'Conectado a Spotify';
@@ -441,6 +563,12 @@ function updateConnectionStatusUI() {
         dom.btnSpotifyDisconnect.classList.remove('hidden');
         dom.btnToggleDemo.classList.remove('active');
         dom.btnToggleDemo.textContent = 'Modo: SPOTIFY EN VIVO';
+
+        if (dom.permCard) {
+            dom.permCard.classList.remove('active');
+            dom.permStatusDesc.innerHTML = '⚠️ Conectado en navegador. Para que quede <strong>guardado para siempre en OBS</strong>, copia este código en tu archivo <code>config.js</code>:';
+            updatePermSnippetUI(config.clientId, config.refreshToken);
+        }
     } else {
         dom.connectionStatusPill.classList.add('offline');
         dom.connectionStatusPill.classList.remove('online');
@@ -449,12 +577,28 @@ function updateConnectionStatusUI() {
         dom.btnSpotifyDisconnect.classList.add('hidden');
         dom.btnToggleDemo.classList.add('active');
         dom.btnToggleDemo.textContent = 'Modo: DEMO ACTIVO';
+
+        if (dom.permCard) {
+            dom.permCard.classList.remove('active');
+            dom.permStatusDesc.innerHTML = 'Rellena tu archivo <code>config.js</code> o inicia sesión una sola vez para generar tu código permanente.';
+            dom.permCodeBox.classList.add('hidden');
+        }
     }
 }
 
 // ==========================================
 // 7. EVENTOS Y LISTENERS
 // ==========================================
+
+function toggleStreamerHud() {
+    const isVisible = dom.streamerHud.classList.toggle('is-visible');
+    if (isVisible) {
+        showToast('⚡ Controles de Spotify VISIBLES (Pulsa H o Ctrl+H para ocultar)');
+    } else {
+        showToast('🔒 Controles de Spotify OCULTOS para Stream');
+        dom.hudPanel.classList.add('hidden');
+    }
+}
 
 function setupEventListeners() {
     // HUD Toggle
@@ -468,16 +612,21 @@ function setupEventListeners() {
 
     // Controles Demo
     dom.btnToggleDemo.addEventListener('click', () => {
-        if (!appState.isDemo && localStorage.getItem('spotify_access_token')) {
+        const config = getActiveConfig();
+        if (!appState.isDemo && (config.refreshToken || config.lastFmUser)) {
             appState.isDemo = true;
             if (appState.pollTimer) clearInterval(appState.pollTimer);
             initDemoMode();
-        } else if (localStorage.getItem('spotify_access_token')) {
+        } else if (config.refreshToken) {
             appState.isDemo = false;
             startApiPolling();
             updateConnectionStatusUI();
+        } else if (config.lastFmUser) {
+            appState.isDemo = false;
+            startLastFmPolling(config.lastFmUser);
+            updateConnectionStatusUI();
         } else {
-            alert('Configura primero tu Client ID de Spotify para salir del modo demo.');
+            alert('Configura tu archivo config.js o inicia sesión para usar Spotify real.');
         }
     });
 
@@ -502,7 +651,7 @@ function setupEventListeners() {
         });
     });
 
-    // Guardar Client ID
+    // Guardar Client ID manual
     dom.btnSaveClientId.addEventListener('click', () => {
         const val = dom.clientIdInput.value.trim();
         if (val) {
@@ -515,27 +664,14 @@ function setupEventListeners() {
     dom.btnSpotifyLogin.addEventListener('click', startSpotifyAuth);
     dom.btnSpotifyDisconnect.addEventListener('click', disconnectSpotify);
 
-    // Sistema de Notificación Rápida (Toast)
-    let toastTimeout = null;
-    function showToast(message) {
-        if (!dom.toast) return;
-        dom.toast.textContent = message;
-        dom.toast.classList.add('show');
-        if (toastTimeout) clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => {
-            dom.toast.classList.remove('show');
-        }, 2200);
-    }
-
-    // Alternar visibilidad del HUD de controles
-    function toggleStreamerHud() {
-        const isVisible = dom.streamerHud.classList.toggle('is-visible');
-        if (isVisible) {
-            showToast('⚡ Controles de Spotify VISIBLES (Pulsa H o Ctrl+H para ocultar)');
-        } else {
-            showToast('🔒 Controles de Spotify OCULTOS para Stream');
-            dom.hudPanel.classList.add('hidden');
-        }
+    // Botón copiar código permanente para config.js
+    if (dom.btnCopyPermCode) {
+        dom.btnCopyPermCode.addEventListener('click', () => {
+            navigator.clipboard.writeText(dom.permCodeSnippet.value).then(() => {
+                dom.btnCopyPermCode.textContent = '¡Código Copiado! Pégalo en config.js';
+                setTimeout(() => { dom.btnCopyPermCode.textContent = 'Copiar código para config.js'; }, 3000);
+            });
+        });
     }
 
     // Atajos de teclado para streamers:
@@ -544,7 +680,7 @@ function setupEventListeners() {
     // 'S': Abrir configuración de Spotify
     // 'Escape': Cerrar paneles y ventanas emergentes
     window.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT') return; // Ignorar si está escribiendo en un input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
         const isHKey = e.key === 'h' || e.key === 'H';
         const isF2 = e.key === 'F2';
@@ -565,32 +701,44 @@ function setupEventListeners() {
 }
 
 // ==========================================
-// 8. INICIALIZACIÓN
+// 8. INICIALIZACIÓN AUTOMÁTICA
 // ==========================================
 
 window.addEventListener('DOMContentLoaded', async () => {
     // Configurar campo de Redirect URI
     dom.redirectUriDisplay.value = getRedirectUri();
 
-    // Cargar Client ID guardado si existe
-    const savedClientId = localStorage.getItem('spotify_client_id');
-    if (savedClientId) {
-        dom.clientIdInput.value = savedClientId;
+    const config = getActiveConfig();
+    if (config.clientId) {
+        dom.clientIdInput.value = config.clientId;
     }
 
     setupEventListeners();
 
-    // Verificar si viene de vuelta de autenticación OAuth
+    // 1. Verificar si viene de vuelta de autenticación OAuth
     await handleSpotifyCallback();
 
-    // Si ya tiene un token guardado, iniciar directamente con API
-    const hasToken = !!localStorage.getItem('spotify_access_token');
-    if (hasToken) {
+    // 2. Comprobar si hay configuración permanente en config.js o en almacenamiento
+    if (config.clientId && config.refreshToken) {
+        console.log('Iniciando conexión con credenciales guardadas...');
+        const ok = await refreshAccessToken();
+        if (ok) {
+            appState.isDemo = false;
+            startApiPolling();
+            updateConnectionStatusUI();
+            console.log('✅ Spotify conectado automáticamente y de forma permanente.');
+            return;
+        } else {
+            console.warn('No se pudo autenticar con el refresh token actual.');
+        }
+    } else if (config.lastFmUser) {
+        console.log('Iniciando conexión Last.fm para:', config.lastFmUser);
         appState.isDemo = false;
-        startApiPolling();
+        startLastFmPolling(config.lastFmUser);
         updateConnectionStatusUI();
-    } else {
-        // Iniciar en modo demo para que siempre se vea activo inmediatamente
-        initDemoMode();
+        return;
     }
+
+    // 3. Si no hay credenciales configuradas, iniciar en modo demo como respaldo
+    initDemoMode();
 });
