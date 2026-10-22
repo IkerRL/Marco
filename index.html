@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camera Frame | MakacaGotica</title>
-    <!-- Usa la misma fuente y hoja de estilos -->
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Fuente Rajdhani -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="camera-body">
@@ -13,6 +15,60 @@
     <!-- Contenedor principal del marco de la cámara -->
     <div class="camera-frame">
         
+        <!-- Ranura superior del marco: límite físico de donde nace y desaparece el desplegable -->
+        <div class="spotify-slot">
+            <div id="spotify-dropdown" class="spotify-dropdown">
+                <!-- Tarjeta desplegable unida directamente al marco -->
+                <div class="spotify-card">
+                    <!-- Portada de la canción -->
+                    <div class="spotify-cover-wrapper">
+                        <img id="spotify-art" class="spotify-art" src="demo_cover.jpg" alt="Portada de canción">
+                        <div class="spotify-cover-glow"></div>
+                        <!-- Ecualizador animado superpuesto -->
+                        <div class="spotify-equalizer" id="spotify-equalizer">
+                            <span class="eq-bar bar-1"></span>
+                            <span class="eq-bar bar-2"></span>
+                            <span class="eq-bar bar-3"></span>
+                            <span class="eq-bar bar-4"></span>
+                        </div>
+                    </div>
+
+                    <!-- Información y barra de progreso -->
+                    <div class="spotify-info">
+                        <div class="spotify-header-row">
+                            <div class="spotify-brand-badge">
+                                <svg class="spotify-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.31a.754.754 0 01-1.037.25c-2.842-1.737-6.42-2.13-10.635-1.168a.755.755 0 01-.338-1.472c4.618-1.055 8.577-.611 11.76 1.353.364.223.477.7.25 1.037zm1.472-3.272a.945.945 0 01-1.3.312c-3.253-2.001-8.212-2.583-12.06-1.415a.945.945 0 11-.552-1.808c4.398-1.334 9.877-.687 13.6 1.611a.945.945 0 01.312 1.3zm.126-3.41c-3.9-2.316-10.334-2.53-14.072-1.396a1.134 1.134 0 11-.658-2.17c4.298-1.305 11.412-1.053 15.89 1.605a1.135 1.135 0 01-1.16 1.961z"/>
+                                </svg>
+                                <span>SPOTIFY</span>
+                            </div>
+                            <div class="spotify-status-tag">
+                                <span class="status-pulse-dot"></span>
+                                <span id="spotify-status-text">REPRODUCIENDO</span>
+                            </div>
+                        </div>
+
+                        <!-- Título de canción y artista -->
+                        <div class="spotify-meta">
+                            <div class="spotify-title-container">
+                                <div id="spotify-title" class="spotify-title">Título de la canción</div>
+                            </div>
+                            <div id="spotify-artist" class="spotify-artist">Artista de la canción</div>
+                        </div>
+
+                        <!-- Barra de progreso y duración -->
+                        <div class="spotify-duration-row">
+                            <span id="spotify-time-current" class="time-text">0:00</span>
+                            <div class="progress-track">
+                                <div id="spotify-progress-bar" class="progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <span id="spotify-time-total" class="time-text">0:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Esquinas decorativas en los 4 lados -->
         <div class="camera-corner top-left"></div>
         <div class="camera-corner top-right"></div>
@@ -21,5 +77,105 @@
         
     </div>
 
+    <!-- Panel de control flotante para streamer (ocultable con tecla 'H') -->
+    <div id="streamer-hud" class="streamer-hud">
+        <button id="hud-toggle-btn" class="hud-pill-btn" title="Controles (Pulsa H para ocultar en stream)">
+            <span class="hud-icon">⚡</span>
+            <span class="hud-label">SPOTIFY OVERLAY</span>
+        </button>
+
+        <div id="hud-panel" class="hud-panel hidden">
+            <div class="hud-panel-header">
+                <span class="hud-panel-title">CONTROL SPOTIFY</span>
+                <button id="hud-close-btn" class="hud-close-btn">&times;</button>
+            </div>
+
+            <!-- Controles Demo -->
+            <div class="hud-group">
+                <span class="group-title">Modo Demostración</span>
+                <div class="btn-grid">
+                    <button id="btn-toggle-demo" class="hud-action-btn active">Demo: ACTIVO</button>
+                    <button id="btn-toggle-playback" class="hud-action-btn">Pausar / Reanudar</button>
+                    <button id="btn-next-track" class="hud-action-btn">Siguiente Pista</button>
+                </div>
+            </div>
+
+            <!-- Conexión Spotify Web API -->
+            <div class="hud-group">
+                <span class="group-title">Conexión en Vivo</span>
+                <button id="btn-open-config" class="hud-accent-btn">⚙️ Conectar Spotify Real</button>
+            </div>
+
+            <div class="hud-tip">
+                <span>Atajos: <strong>D</strong> (Play/Pause) | <strong>H</strong> (Ocultar panel)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Configuración Spotify Web API -->
+    <div id="spotify-modal" class="spotify-modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Conexión con Spotify Web API</h3>
+                <button id="modal-close-btn" class="modal-close-icon">&times;</button>
+            </div>
+
+            <div class="modal-content">
+                <p class="modal-intro">
+                    Sigue estos sencillos pasos para que el marco detecte tu música de Spotify en tiempo real:
+                </p>
+
+                <div class="step-item">
+                    <div class="step-badge">1</div>
+                    <div class="step-desc">
+                        <strong>Crea tu App en Spotify Developer:</strong>
+                        <p>Entra en <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify Developer Dashboard</a>, inicia sesión y pulsa <em>"Create app"</em>.</p>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-badge">2</div>
+                    <div class="step-desc">
+                        <strong>Añade esta URL exacta en "Redirect URIs":</strong>
+                        <div class="uri-copy-box">
+                            <input type="text" id="redirect-uri-display" readonly>
+                            <button id="btn-copy-uri" class="btn-copy">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-badge">3</div>
+                    <div class="step-desc">
+                        <strong>Pega aquí tu Client ID de Spotify:</strong>
+                        <div class="client-id-row">
+                            <input type="text" id="client-id-input" placeholder="Ej: 4c8a2b...">
+                            <button id="btn-save-client-id" class="btn-primary">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <div id="connection-status-pill" class="status-pill offline">
+                        <span class="pill-dot"></span>
+                        <span id="connection-status-text">Sin conectar</span>
+                    </div>
+
+                    <button id="btn-spotify-login" class="btn-spotify-connect">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.31a.754.754 0 01-1.037.25c-2.842-1.737-6.42-2.13-10.635-1.168a.755.755 0 01-.338-1.472c4.618-1.055 8.577-.611 11.76 1.353.364.223.477.7.25 1.037zm1.472-3.272a.945.945 0 01-1.3.312c-3.253-2.001-8.212-2.583-12.06-1.415a.945.945 0 11-.552-1.808c4.398-1.334 9.877-.687 13.6 1.611a.945.945 0 01.312 1.3zm.126-3.41c-3.9-2.316-10.334-2.53-14.072-1.396a1.134 1.134 0 11-.658-2.17c4.298-1.305 11.412-1.053 15.89 1.605a1.135 1.135 0 01-1.16 1.961z"/>
+                        </svg>
+                        <span>Iniciar Sesión con Spotify</span>
+                    </button>
+
+                    <button id="btn-spotify-disconnect" class="btn-disconnect hidden">Desconectar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de lógica de marco y Spotify -->
+    <script src="script.js"></script>
 </body>
 </html>

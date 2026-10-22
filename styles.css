@@ -1,93 +1,48 @@
-/* Importar la fuente Rajdhani */
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+/* ===================================================
+   CAMERA FRAME & SPOTIFY DYNAMIC OVERLAY (Cyberpunk)
+   =================================================== */
 
-/* Estilos Globales y Centrado */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+
+/* Reset y Base */
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: #0f0019; /* Fondo oscuro púrpura */
-    font-family: "Rajdhani", sans-serif;
-}
-
-/* Contenedor del Panel (Estilo Futurista) */
-.social-panel {
-    width: 190px;
-    padding: 14px 20px;
-    background: rgba(15, 0, 25, 0.9);
-    border: 2px solid #8b5cf6; 
-    clip-path: polygon(0 0, 96% 0, 100% 15%, 100% 100%, 4% 100%, 0 85%);
-    box-shadow: 0 0 20px rgba(160, 50, 255, 0.4);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-/* Contenedor del Icono */
-.social-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 6px;
-    background: linear-gradient(180deg, rgba(60, 0, 90, 0.35), rgba(40, 0, 70, 0.35));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0; 
-}
-
-/* Estilo para la imagen inyectada (Logo) */
-.social-icon img {
-    width: 35px; /* Tamaño del logo dentro del contenedor */
-    height: 48px;
-    object-fit: contain; /* Asegura que la imagen se vea bien sin estirarse */
-    /* *** LÍNEA ELIMINADA: filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5)); *** */
-}
-
-/* Estilo del Nombre de Usuario */
-.social-user {
-    font-size: 20px;
-    font-weight: 600;
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(150, 80, 255, 0.9);
-    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+    user-select: none;
 }
 
 /* =========================================
-   MARCO PARA CÁMARA (camera.html)
+   MARCO PARA CÁMARA OBS
    ========================================= */
 
 body.camera-body {
-    /* IMPORTANTE: Fondo transparente para que en OBS se vea la cámara detrás */
     background: transparent !important; 
-    /* Si quieres probarlo en tu navegador y no ves nada, 
-       puedes cambiar momentáneamente esto a #0f0019 */
-    overflow: hidden; /* Evita que aparezcan barras de desplazamiento en OBS */
+    overflow: hidden;
 }
 
 .camera-frame {
     position: relative;
-    
-    /* Se adapta automáticamente al tamaño que tenga la fuente en OBS (por defecto 800x600) */
-    /* Restamos 60px para que las sombras y los bordes no se corten en los bordes de la ventana */
     width: calc(100vw - 60px); 
     height: calc(100vh - 60px);
-    box-sizing: border-box;
-    
-    /* El borde morado más gordito */
     border: 8px solid #8b5cf6;
-    
     background: transparent;
-    
-    /* Animación de entrada y luego pulso de neón infinito */
-    animation: frameAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, neonPulse 3s 0.8s infinite alternate;
+    animation: frameAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, 
+               neonPulse 3s 0.8s infinite alternate;
 }
 
 @keyframes frameAppear {
     0% {
         opacity: 0;
-        transform: scale(0.9);
+        transform: scale(0.92);
         box-shadow: 0 0 0 rgba(160, 50, 255, 0);
     }
     100% {
@@ -108,14 +63,12 @@ body.camera-body {
     }
 }
 
-/* Detalles decorativos en las 4 esquinas */
+/* Esquinas decorativas de alta tecnología */
 .camera-corner {
     position: absolute;
     width: 60px;
     height: 60px;
     border: 6px solid #ffffff;
-    
-    /* Animación de pulso independiente para las esquinas */
     animation: cornerPulse 2s infinite alternate ease-in-out;
 }
 
@@ -156,4 +109,670 @@ body.camera-body {
     right: -8px;
     border-left: none;
     border-top: none;
+}
+
+/* ===================================================
+   SPOTIFY DESPLEGABLE SUPERIOR CENTRADO (DYNAMIC NOTCH)
+   El marco es el límite físico: la extensión nace y 
+   se repliega directamente desde el borde superior.
+   =================================================== */
+
+.spotify-slot {
+    position: absolute;
+    top: 0; /* Anclado justo en el borde interno superior del marco */
+    left: 50%;
+    transform: translateX(-50%);
+    /* El límite superior estricto es Y = 0 (borde del marco). 
+       Los márgenes negativos a los lados y abajo protegen las sombras y brillo neón */
+    clip-path: inset(0px -100px -150px -100px);
+    pointer-events: none;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+}
+
+.spotify-dropdown {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Al estar inactivo/pausado, se repliega hacia arriba dentro del marco */
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 0.45s ease;
+}
+
+/* Estado activo: cuando Spotify está reproduciendo, desciende suavemente */
+.spotify-dropdown.is-active {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Tarjeta desplegable principal (separación sutil y armónica: ni pegada ni alejada) */
+.spotify-card {
+    position: relative;
+    width: 420px;
+    max-width: calc(100vw - 180px);
+    margin-top: 5px; /* Separación sutil del borde para darle aire visual */
+    background: linear-gradient(180deg, rgba(22, 5, 38, 0.98) 0%, rgba(12, 2, 22, 0.98) 100%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 2px solid #8b5cf6;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75), 
+                0 0 25px rgba(139, 92, 246, 0.4), 
+                inset 0 0 15px rgba(139, 92, 246, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Pequeñas esquinas decorativas en la base de la tarjeta */
+.spotify-card::before,
+.spotify-card::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    width: 12px;
+    height: 12px;
+    border-bottom: 2px solid #ffffff;
+    pointer-events: none;
+}
+.spotify-card::before {
+    left: -2px;
+    border-left: 2px solid #ffffff;
+    border-bottom-left-radius: 14px;
+}
+.spotify-card::after {
+    right: -2px;
+    border-right: 2px solid #ffffff;
+    border-bottom-right-radius: 14px;
+}
+
+/* Portada del Álbum / Canción */
+.spotify-cover-wrapper {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid rgba(139, 92, 246, 0.8);
+    box-shadow: 0 0 14px rgba(139, 92, 246, 0.5);
+    background: #000;
+}
+
+.spotify-art {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.spotify-dropdown.is-active .spotify-art {
+    transform: scale(1.02);
+}
+
+/* Ecualizador animado superpuesto a la portada */
+.spotify-equalizer {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    background: rgba(10, 0, 20, 0.85);
+    border: 1px solid rgba(139, 92, 246, 0.6);
+    border-radius: 4px;
+    padding: 2px 4px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 16px;
+}
+
+.eq-bar {
+    width: 3px;
+    background: #1DB954;
+    border-radius: 1px;
+    height: 3px;
+    transition: height 0.2s ease;
+}
+
+/* Animación del ecualizador cuando suena la música */
+.spotify-dropdown.is-active .eq-bar.bar-1 {
+    animation: eqAnim1 0.7s infinite alternate ease-in-out;
+}
+.spotify-dropdown.is-active .eq-bar.bar-2 {
+    animation: eqAnim2 0.5s infinite alternate ease-in-out 0.15s;
+}
+.spotify-dropdown.is-active .eq-bar.bar-3 {
+    animation: eqAnim3 0.8s infinite alternate ease-in-out 0.3s;
+}
+.spotify-dropdown.is-active .eq-bar.bar-4 {
+    animation: eqAnim4 0.6s infinite alternate ease-in-out 0.2s;
+}
+
+@keyframes eqAnim1 { 0% { height: 3px; background: #1DB954; } 100% { height: 12px; background: #a855f7; } }
+@keyframes eqAnim2 { 0% { height: 11px; background: #a855f7; } 100% { height: 4px; background: #1DB954; } }
+@keyframes eqAnim3 { 0% { height: 5px; background: #1DB954; } 100% { height: 13px; background: #c084fc; } }
+@keyframes eqAnim4 { 0% { height: 13px; background: #c084fc; } 100% { height: 3px; background: #1DB954; } }
+
+/* Si se pausa la canción */
+.spotify-dropdown.is-paused .eq-bar {
+    animation: none !important;
+    height: 3px !important;
+    background: #64748b;
+}
+
+/* Área de Información */
+.spotify-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Fila Superior (Badge Spotify y Estado) */
+.spotify-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.spotify-brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #1DB954;
+    text-shadow: 0 0 6px rgba(29, 185, 84, 0.4);
+}
+
+.spotify-brand-badge svg {
+    filter: drop-shadow(0 0 4px #1DB954);
+}
+
+.spotify-status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: #c4b5fd;
+    text-transform: uppercase;
+}
+
+.status-pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #1DB954;
+    box-shadow: 0 0 6px #1DB954;
+    animation: pulseDot 1.4s infinite;
+}
+
+@keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.6; }
+}
+
+.spotify-dropdown.is-paused .status-pulse-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 6px #f59e0b;
+    animation: none;
+}
+
+/* Metadatos (Título y Artista) */
+.spotify-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.spotify-title-container {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.spotify-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.7);
+    line-height: 1.2;
+    display: inline-block;
+}
+
+.spotify-artist {
+    font-size: 12px;
+    font-weight: 600;
+    color: #c4b5fd;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+/* Fila de Barra de Duración */
+.spotify-duration-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 3px;
+}
+
+.time-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    min-width: 26px;
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #1DB954 0%, #8b5cf6 55%, #c084fc 100%);
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.8), 0 0 4px #1DB954;
+    border-radius: 2px;
+    transition: width 0.3s linear;
+}
+
+/* ===================================================
+   PANEL FLOTANTE DEL STREAMER (HUD DE CONTROL)
+   =================================================== */
+
+.streamer-hud {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    z-index: 1000;
+    font-family: 'Rajdhani', sans-serif;
+    transition: opacity 0.3s ease;
+}
+
+.streamer-hud.hidden-by-user {
+    display: none !important;
+}
+
+.hud-pill-btn {
+    background: rgba(20, 5, 38, 0.85);
+    border: 1px solid #8b5cf6;
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(139, 92, 246, 0.4);
+    backdrop-filter: blur(8px);
+    transition: all 0.25s ease;
+}
+
+.hud-pill-btn:hover {
+    background: rgba(40, 10, 75, 0.95);
+    border-color: #a855f7;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
+}
+
+.hud-icon {
+    color: #a855f7;
+}
+
+.hud-panel {
+    position: absolute;
+    bottom: 45px;
+    right: 0;
+    width: 290px;
+    background: rgba(18, 4, 32, 0.96);
+    border: 2px solid #8b5cf6;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(139, 92, 246, 0.4);
+    backdrop-filter: blur(14px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.hud-panel.hidden {
+    display: none;
+}
+
+.hud-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+    padding-bottom: 6px;
+}
+
+.hud-panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.hud-close-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.hud-close-btn:hover {
+    color: #ffffff;
+}
+
+.hud-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.group-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #a855f7;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.btn-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+}
+
+.hud-action-btn,
+.hud-accent-btn {
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    color: #ffffff;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.hud-action-btn:hover {
+    background: rgba(139, 92, 246, 0.3);
+    border-color: #a855f7;
+}
+
+.hud-action-btn.active {
+    background: rgba(139, 92, 246, 0.4);
+    border-color: #a855f7;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+.hud-accent-btn {
+    background: linear-gradient(90deg, #1DB954 0%, #179644 100%);
+    border: none;
+    font-weight: 700;
+    color: #000;
+}
+
+.hud-accent-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+.hud-tip {
+    font-size: 11px;
+    color: #94a3b8;
+    border-top: 1px solid rgba(139, 92, 246, 0.2);
+    padding-top: 6px;
+    text-align: center;
+}
+
+/* ===================================================
+   MODAL DE CONFIGURACIÓN SPOTIFY WEB API
+   =================================================== */
+
+.spotify-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spotify-modal.hidden {
+    display: none;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 0, 12, 0.85);
+    backdrop-filter: blur(8px);
+}
+
+.modal-box {
+    position: relative;
+    width: 500px;
+    max-width: 90vw;
+    background: #0f0019;
+    border: 2px solid #8b5cf6;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), 0 0 35px rgba(139, 92, 246, 0.5);
+    color: #ffffff;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.4);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #a855f7;
+    letter-spacing: 0.5px;
+}
+
+.modal-close-icon {
+    background: none;
+    border: none;
+    color: #cbd5e1;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-close-icon:hover {
+    color: #ffffff;
+}
+
+.modal-intro {
+    font-size: 14px;
+    color: #cbd5e1;
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+}
+
+.step-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.step-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #8b5cf6;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.step-desc {
+    flex: 1;
+    font-size: 13px;
+    color: #e2e8f0;
+}
+
+.step-desc strong {
+    color: #ffffff;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.step-desc p {
+    margin: 0 0 6px 0;
+    color: #94a3b8;
+}
+
+.step-desc a {
+    color: #1DB954;
+    text-decoration: underline;
+}
+
+.uri-copy-box,
+.client-id-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.uri-copy-box input,
+.client-id-row input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    border-radius: 6px;
+    color: #ffffff;
+    padding: 7px 10px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.btn-copy,
+.btn-primary {
+    background: #8b5cf6;
+    border: none;
+    color: #ffffff;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.btn-copy:hover,
+.btn-primary:hover {
+    background: #a855f7;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    border-top: 1px solid rgba(139, 92, 246, 0.3);
+    padding-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-pill .pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-pill.offline .pill-dot { background: #ef4444; }
+.status-pill.online .pill-dot { background: #1DB954; box-shadow: 0 0 8px #1DB954; }
+
+.btn-spotify-connect {
+    background: #1DB954;
+    border: none;
+    color: #000000;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+    transition: all 0.2s ease;
+}
+
+.btn-spotify-connect:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-disconnect {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-disconnect:hover {
+    background: #ef4444;
+    color: #ffffff;
 }
