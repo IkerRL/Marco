@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Frame | MakacaGotica</title>
-    <!-- Fuente Rajdhani -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <title>Camera Frame | Twitch Interactive Overlay</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="camera-body">
+
+<body class="camera-body theme-normal">
 
     <!-- Contenedor principal del marco de la cámara -->
     <div class="camera-frame">
@@ -19,6 +17,124 @@
         <div class="camera-corner top-right"></div>
         <div class="camera-corner bottom-left"></div>
         <div class="camera-corner bottom-right"></div>
+
+        <!-- ==============================================
+             ELEMENTOS EXCLUSIVOS DEL TEMA GTA VI
+             ============================================== -->
+        <div class="gta-decorations">
+            <!-- Bruma sutil de atardecer en el borde inferior -->
+            <div class="gta-sunset-glow"></div>
+
+            <!-- Partículas sutiles de neón flotantes en los bordes -->
+            <div class="gta-particles">
+                <span class="particle p1"></span>
+                <span class="particle p2"></span>
+                <span class="particle p3"></span>
+                <span class="particle p4"></span>
+                <span class="particle p5"></span>
+                <span class="particle p6"></span>
+            </div>
+
+            <!-- Palmeras Tropicales Izquierda (Silueta doble realista con contraluz neón) -->
+            <div class="gta-palm-group gta-palm-left">
+                <!-- Palmera principal alta -->
+                <svg class="palm-svg palm-main" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="palmSilLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#2b0938" />
+                            <stop offset="55%" stop-color="#140421" />
+                            <stop offset="100%" stop-color="#090212" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Tronco curvado orgánico -->
+                    <path fill="url(#palmSilLeft)"
+                        d="M 52 260 C 66 205 78 148 70 92 C 69 89 75 88 77 92 C 88 148 78 205 66 260 Z" />
+                    <!-- Frondas detalladas con puntas plumosas -->
+                    <path fill="url(#palmSilLeft)"
+                        d="M 73 91 C 52 72 28 70 4 86 C 18 76 28 75 34 78 C 22 83 14 91 8 100 C 26 86 48 84 71 93 Z" />
+                    <path fill="url(#palmSilLeft)"
+                        d="M 72 89 C 46 54 16 42 -12 52 C 6 46 18 48 26 53 C 12 54 2 62 -6 72 C 18 58 46 62 71 90 Z" />
+                    <path fill="url(#palmSilLeft)"
+                        d="M 73 88 C 58 42 38 18 12 8 C 28 16 38 25 44 35 C 32 26 18 24 6 28 C 30 28 54 48 72 89 Z" />
+                    <path fill="url(#palmSilLeft)"
+                        d="M 74 87 C 75 40 68 10 52 -10 C 62 6 68 22 70 36 C 64 20 54 10 42 4 C 60 22 70 50 74 87 Z" />
+                    <path fill="url(#palmSilLeft)"
+                        d="M 75 87 C 94 42 114 20 136 8 C 120 20 110 30 104 42 C 118 32 132 28 146 30 C 120 34 94 54 76 88 Z" />
+                    <path fill="url(#palmSilLeft)"
+                        d="M 76 89 C 110 58 144 54 176 66 C 154 60 140 62 130 67 C 148 68 162 75 174 86 C 144 72 110 72 76 91 Z" />
+                    <path fill="url(#palmSilLeft)"
+                        d="M 76 91 C 112 78 142 90 166 116 C 148 102 134 98 122 98 C 138 106 148 118 154 132 C 132 108 104 94 75 93 Z" />
+                    <path fill="url(#palmSilLeft)"
+                        d="M 74 93 C 96 98 114 118 124 146 C 112 128 100 118 90 114 C 102 126 108 140 110 154 C 98 126 84 106 73 94 Z" />
+                </svg>
+                <!-- Palmera secundaria más pequeña -->
+                <svg class="palm-svg palm-secondary" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="url(#palmSilLeft)"
+                        d="M 38 200 C 52 160 66 122 82 86 C 84 83 88 85 87 88 C 72 124 60 162 48 200 Z" />
+                    <path fill="url(#palmSilLeft)" d="M 84 86 C 64 70 42 70 20 82 C 38 76 58 78 82 88 Z" />
+                    <path fill="url(#palmSilLeft)" d="M 85 85 C 72 52 54 34 32 28 C 52 38 68 56 83 85 Z" />
+                    <path fill="url(#palmSilLeft)" d="M 86 85 C 94 48 108 28 126 18 C 110 34 98 54 87 85 Z" />
+                    <path fill="url(#palmSilLeft)" d="M 87 86 C 114 66 138 68 158 84 C 136 74 112 74 87 88 Z" />
+                    <path fill="url(#palmSilLeft)" d="M 86 88 C 112 86 134 102 146 126 C 128 106 108 94 85 90 Z" />
+                </svg>
+            </div>
+
+            <!-- Palmeras Tropicales Derecha (Silueta doble realista con contraluz neón) -->
+            <div class="gta-palm-group gta-palm-right">
+                <!-- Palmera principal alta -->
+                <svg class="palm-svg palm-main" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="palmSilRight" x1="100%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#2b0938" />
+                            <stop offset="55%" stop-color="#140421" />
+                            <stop offset="100%" stop-color="#090212" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Tronco curvado orgánico -->
+                    <path fill="url(#palmSilRight)"
+                        d="M 148 260 C 134 205 122 148 130 92 C 131 89 125 88 123 92 C 112 148 122 205 134 260 Z" />
+                    <!-- Frondas detalladas -->
+                    <path fill="url(#palmSilRight)"
+                        d="M 127 91 C 148 72 172 70 196 86 C 182 76 172 75 166 78 C 178 83 186 91 192 100 C 174 86 152 84 129 93 Z" />
+                    <path fill="url(#palmSilRight)"
+                        d="M 128 89 C 154 54 184 42 212 52 C 194 46 182 48 174 53 C 188 54 198 62 206 72 C 182 58 154 62 129 90 Z" />
+                    <path fill="url(#palmSilRight)"
+                        d="M 127 88 C 142 42 162 18 188 8 C 172 16 162 25 156 35 C 168 26 182 24 194 28 C 170 28 146 48 128 89 Z" />
+                    <path fill="url(#palmSilRight)"
+                        d="M 126 87 C 125 40 132 10 148 -10 C 138 6 132 22 130 36 C 136 20 146 10 158 4 C 140 22 130 50 126 87 Z" />
+                    <path fill="url(#palmSilRight)"
+                        d="M 125 87 C 106 42 86 20 64 8 C 80 20 90 30 96 42 C 82 32 68 28 54 30 C 80 34 106 54 124 88 Z" />
+                    <path fill="url(#palmSilRight)"
+                        d="M 124 89 C 90 58 56 54 24 66 C 46 60 60 62 70 67 C 52 68 38 75 26 86 C 56 72 90 72 124 91 Z" />
+                    <path fill="url(#palmSilRight)"
+                        d="M 124 91 C 88 78 58 90 34 116 C 52 102 66 98 78 98 C 62 106 52 118 46 132 C 68 108 96 94 125 93 Z" />
+                    <path fill="url(#palmSilRight)"
+                        d="M 126 93 C 104 98 86 118 76 146 C 88 128 100 118 110 114 C 98 126 92 140 90 154 C 102 126 116 106 127 94 Z" />
+                </svg>
+                <!-- Palmera secundaria más pequeña -->
+                <svg class="palm-svg palm-secondary" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="url(#palmSilRight)"
+                        d="M 122 200 C 108 160 94 122 78 86 C 76 83 72 85 73 88 C 88 124 100 162 112 200 Z" />
+                    <path fill="url(#palmSilRight)" d="M 76 86 C 96 70 118 70 140 82 C 122 76 102 78 78 88 Z" />
+                    <path fill="url(#palmSilRight)" d="M 75 85 C 88 52 106 34 128 28 C 108 38 92 56 77 85 Z" />
+                    <path fill="url(#palmSilRight)" d="M 74 85 C 66 48 52 28 34 18 C 50 34 62 54 73 85 Z" />
+                    <path fill="url(#palmSilRight)" d="M 73 86 C 46 66 22 68 2 84 C 24 74 48 74 73 88 Z" />
+                    <path fill="url(#palmSilRight)" d="M 74 88 C 48 86 26 102 14 126 C 32 106 52 94 75 90 Z" />
+                </svg>
+            </div>
+
+            <!-- Líneas de atardecer en la base -->
+            <div class="gta-sunset-lines">
+                <div class="sunset-bar bar-1"></div>
+                <div class="sunset-bar bar-2"></div>
+                <div class="sunset-bar bar-3"></div>
+            </div>
+        </div>
     </div>
+
+    <!-- Scripts de configuración y conexión Twitch IRC -->
+    <script src="config.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>

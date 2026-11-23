@@ -1,8 +1,13 @@
 /* ===================================================
-   CAMERA FRAME (Cyberpunk)
+   CAMERA FRAME (Cyberpunk Normal & GTA VI Themes)
    =================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+/* Propiedad animable para el gradiente fluido del borde GTA VI */
+@property --gta-angle {
+    syntax: '<angle>';
+    initial-value: 135deg;
+    inherits: false;
+}
 
 /* Reset y Base */
 * {
@@ -16,12 +21,12 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    font-family: 'Rajdhani', sans-serif;
     user-select: none;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
 /* =========================================
-   MARCO PARA CÁMARA OBS
+   MARCO BASE PARA CÁMARA OBS
    ========================================= */
 
 body.camera-body {
@@ -33,54 +38,373 @@ body.camera-body {
     position: relative;
     width: calc(100vw - 60px); 
     height: calc(100vh - 60px);
-    border: 8px solid #8b5cf6;
     background: transparent;
-    animation: frameAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, 
-               neonPulse 3s 0.8s infinite alternate;
+    transition: border-color 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    animation: frameAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 @keyframes frameAppear {
     0% {
         opacity: 0;
-        transform: scale(0.92);
-        box-shadow: 0 0 0 rgba(160, 50, 255, 0);
+        transform: scale(0.94);
     }
     100% {
         opacity: 1;
         transform: scale(1);
-        box-shadow: 0 0 25px rgba(160, 50, 255, 0.5), inset 0 0 25px rgba(160, 50, 255, 0.5);
     }
+}
+
+/* =========================================
+   TEMA 1: NORMAL (CYBERPUNK PURPLE)
+   ========================================= */
+
+body.theme-normal .camera-frame {
+    border: 8px solid #8b5cf6;
+    animation: frameAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, 
+               neonPulse 3s 0.8s infinite alternate;
 }
 
 @keyframes neonPulse {
     0% {
-        box-shadow: 0 0 15px rgba(160, 50, 255, 0.3), inset 0 0 15px rgba(160, 50, 255, 0.3);
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.4), inset 0 0 15px rgba(139, 92, 246, 0.4);
         border-color: #7b4df0;
     }
     100% {
-        box-shadow: 0 0 45px rgba(160, 50, 255, 0.9), inset 0 0 45px rgba(160, 50, 255, 0.9);
+        box-shadow: 0 0 45px rgba(168, 85, 247, 0.95), inset 0 0 35px rgba(168, 85, 247, 0.8);
         border-color: #a855f7;
     }
 }
 
-/* Esquinas decorativas de alta tecnología */
-.camera-corner {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    border: 6px solid #ffffff;
+body.theme-normal .camera-corner {
+    border-color: #ffffff;
     animation: cornerPulse 2s infinite alternate ease-in-out;
 }
 
 @keyframes cornerPulse {
     0% {
-        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
         border-color: rgba(255, 255, 255, 0.7);
     }
     100% {
-        box-shadow: 0 0 20px rgba(255, 255, 255, 1);
+        box-shadow: 0 0 22px rgba(255, 255, 255, 1), 0 0 35px rgba(168, 85, 247, 0.8);
         border-color: #ffffff;
     }
+}
+
+/* En tema normal, las decoraciones de GTA VI están ocultas */
+body.theme-normal .gta-decorations {
+    opacity: 0;
+    transform: scale(0.96);
+    pointer-events: none;
+}
+
+/* =========================================
+   TEMA 2: GTA VI (SUNSET & NEON)
+   ========================================= */
+
+body.theme-gtavi .camera-frame {
+    border: 8px solid transparent;
+    border-image: linear-gradient(
+        var(--gta-angle),
+        #ff2a85 0%,
+        #ff7b54 25%,
+        #9d4edd 50%,
+        #00f0ff 75%,
+        #ff2a85 100%
+    ) 1;
+    animation: frameAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+               gtaBorderRotate 8s linear infinite,
+               gtaPulse 3s 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes gtaBorderRotate {
+    0% {
+        --gta-angle: 0deg;
+    }
+    100% {
+        --gta-angle: 360deg;
+    }
+}
+
+@keyframes gtaPulse {
+    0% {
+        box-shadow: 
+            0 0 22px rgba(255, 42, 133, 0.75),
+            0 0 50px rgba(255, 123, 84, 0.45),
+            0 0 80px rgba(0, 240, 255, 0.35),
+            inset 0 0 22px rgba(0, 240, 255, 0.55),
+            inset 0 0 40px rgba(255, 42, 133, 0.35);
+    }
+    100% {
+        box-shadow: 
+            0 0 42px rgba(255, 42, 133, 0.95),
+            0 0 85px rgba(0, 240, 255, 0.75),
+            0 0 115px rgba(255, 123, 84, 0.55),
+            inset 0 0 38px rgba(0, 240, 255, 0.85),
+            inset 0 0 55px rgba(255, 42, 133, 0.55);
+    }
+}
+
+/* Esquinas GTA VI con doble acento neón */
+body.theme-gtavi .camera-corner {
+    border-color: #00f0ff;
+    animation: gtaCornerPulse 2s infinite alternate ease-in-out;
+}
+
+body.theme-gtavi .camera-corner::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #ff2a85;
+    box-shadow: 0 0 10px rgba(255, 42, 133, 0.9);
+    opacity: 0.9;
+}
+
+body.theme-gtavi .camera-corner.top-left::after {
+    top: 6px;
+    left: 6px;
+    border-right: none;
+    border-bottom: none;
+}
+
+body.theme-gtavi .camera-corner.top-right::after {
+    top: 6px;
+    right: 6px;
+    border-left: none;
+    border-bottom: none;
+}
+
+body.theme-gtavi .camera-corner.bottom-left::after {
+    bottom: 6px;
+    left: 6px;
+    border-right: none;
+    border-top: none;
+}
+
+body.theme-gtavi .camera-corner.bottom-right::after {
+    bottom: 6px;
+    right: 6px;
+    border-left: none;
+    border-top: none;
+}
+
+@keyframes gtaCornerPulse {
+    0% {
+        border-color: #00f0ff;
+        box-shadow: 
+            0 0 12px rgba(0, 240, 255, 0.85),
+            0 0 25px rgba(255, 42, 133, 0.5);
+    }
+    100% {
+        border-color: #ffffff;
+        box-shadow: 
+            0 0 24px rgba(0, 240, 255, 1),
+            0 0 42px rgba(255, 42, 133, 0.9),
+            0 0 65px rgba(255, 123, 84, 0.7);
+    }
+}
+
+/* =========================================
+   ELEMENTOS DECORATIVOS GTA VI
+   ========================================= */
+
+.gta-decorations {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Bruma sutil de atardecer en el borde inferior (centro 100% limpio) */
+.gta-sunset-glow {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 18%;
+    background: linear-gradient(
+        to top,
+        rgba(255, 42, 133, 0.16) 0%,
+        rgba(255, 123, 84, 0.06) 45%,
+        transparent 100%
+    );
+    z-index: 2;
+}
+
+/* --- PARTÍCULAS NEÓN FLOTANTES --- */
+.gta-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+}
+
+.particle {
+    position: absolute;
+    bottom: 8px;
+    border-radius: 50%;
+    opacity: 0;
+    animation: floatParticle 6s infinite ease-in-out;
+}
+
+.particle.p1 { left: 8%;  width: 5px; height: 5px; background: #ff2a85; box-shadow: 0 0 10px #ff2a85; animation-delay: 0s; animation-duration: 5.5s; }
+.particle.p2 { left: 14%; width: 4px; height: 4px; background: #00f0ff; box-shadow: 0 0 10px #00f0ff; animation-delay: 1.8s; animation-duration: 6.8s; }
+.particle.p3 { left: 22%; width: 3px; height: 3px; background: #ff9e5e; box-shadow: 0 0 8px #ff9e5e; animation-delay: 3.1s; animation-duration: 5s; }
+.particle.p4 { right: 8%; width: 5px; height: 5px; background: #00f0ff; box-shadow: 0 0 10px #00f0ff; animation-delay: 0.9s; animation-duration: 6s; }
+.particle.p5 { right: 15%; width: 4px; height: 4px; background: #ff2a85; box-shadow: 0 0 10px #ff2a85; animation-delay: 2.4s; animation-duration: 7s; }
+.particle.p6 { right: 23%; width: 3px; height: 3px; background: #ffb347; box-shadow: 0 0 8px #ffb347; animation-delay: 4s; animation-duration: 5.2s; }
+
+@keyframes floatParticle {
+    0% {
+        transform: translateY(0) scale(0.6);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.85;
+    }
+    80% {
+        opacity: 0.4;
+    }
+    100% {
+        transform: translateY(-130px) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* --- PALMERAS TROPICALES REALISTAS --- */
+.gta-palm-group {
+    position: absolute;
+    bottom: -8px;
+    width: 210px;
+    height: 240px;
+    z-index: 10;
+}
+
+.gta-palm-left {
+    left: -12px;
+}
+
+.gta-palm-right {
+    right: -12px;
+}
+
+.palm-svg {
+    position: absolute;
+    bottom: 0;
+    overflow: visible;
+    transform-origin: bottom center;
+    /* Contraluz neón tropical sobre silueta oscura */
+    filter: drop-shadow(0 0 6px rgba(255, 42, 133, 0.95))
+            drop-shadow(0 0 14px rgba(255, 123, 84, 0.7))
+            drop-shadow(0 0 26px rgba(0, 240, 255, 0.55));
+}
+
+.palm-main {
+    width: 175px;
+    height: 225px;
+}
+
+.palm-secondary {
+    width: 120px;
+    height: 150px;
+    opacity: 0.92;
+}
+
+.gta-palm-left .palm-main {
+    left: 0;
+    animation: palmSwayLeft 6.5s ease-in-out infinite alternate;
+}
+
+.gta-palm-left .palm-secondary {
+    left: 38px;
+    animation: palmSwayLeftSub 4.8s ease-in-out infinite alternate;
+}
+
+.gta-palm-right .palm-main {
+    right: 0;
+    animation: palmSwayRight 6.5s ease-in-out infinite alternate;
+}
+
+.gta-palm-right .palm-secondary {
+    right: 38px;
+    animation: palmSwayRightSub 4.8s ease-in-out infinite alternate;
+}
+
+@keyframes palmSwayLeft {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-2.4deg); }
+    100% { transform: rotate(1.8deg); }
+}
+
+@keyframes palmSwayLeftSub {
+    0% { transform: rotate(1deg); }
+    50% { transform: rotate(-1.8deg); }
+    100% { transform: rotate(2.6deg); }
+}
+
+@keyframes palmSwayRight {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(2.4deg); }
+    100% { transform: rotate(-1.8deg); }
+}
+
+@keyframes palmSwayRightSub {
+    0% { transform: rotate(-1deg); }
+    50% { transform: rotate(1.8deg); }
+    100% { transform: rotate(-2.6deg); }
+}
+
+/* --- SUNSET HORIZON LINES (BOTTOM CENTER) --- */
+.gta-sunset-lines {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 8;
+}
+
+.sunset-bar {
+    height: 3px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        #00f0ff 18%, 
+        #ff2a85 50%, 
+        #ff8e53 82%, 
+        transparent 100%);
+    filter: drop-shadow(0 0 6px rgba(255, 42, 133, 0.9));
+    animation: sunsetBarGlow 3s infinite alternate ease-in-out;
+}
+
+.sunset-bar.bar-1 { width: 220px; }
+.sunset-bar.bar-2 { width: 145px; opacity: 0.85; animation-delay: 0.4s; }
+.sunset-bar.bar-3 { width: 80px; opacity: 0.65; animation-delay: 0.8s; }
+
+@keyframes sunsetBarGlow {
+    0% { opacity: 0.65; transform: scaleX(0.96); }
+    100% { opacity: 1; transform: scaleX(1.04); }
+}
+
+/* =========================================
+   ESQUINAS DECORATIVAS
+   ========================================= */
+
+.camera-corner {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 6px solid #ffffff;
+    transition: border-color 0.6s ease, box-shadow 0.6s ease;
+    z-index: 12;
 }
 
 .camera-corner.top-left {
@@ -109,4 +433,44 @@ body.camera-body {
     right: -8px;
     border-left: none;
     border-top: none;
+}
+
+/* =========================================
+   NOTIFICACIÓN EN PANTALLA (TOAST FEEDBACK)
+   ========================================= */
+
+.theme-toast {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-30px);
+    opacity: 0;
+    pointer-events: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffffff;
+    backdrop-filter: blur(10px);
+    background: rgba(10, 10, 20, 0.85);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
+}
+
+.theme-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+body.theme-normal .theme-toast {
+    border: 2px solid #8b5cf6;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.7);
+}
+
+body.theme-gtavi .theme-toast {
+    border: 2px solid #ff2a85;
+    box-shadow: 0 0 25px rgba(255, 42, 133, 0.8), 0 0 15px rgba(0, 240, 255, 0.6);
+    background: linear-gradient(135deg, rgba(20, 5, 25, 0.9) 0%, rgba(5, 15, 30, 0.9) 100%);
 }
